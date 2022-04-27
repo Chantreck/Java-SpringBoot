@@ -1,0 +1,17 @@
+spring:
+  flyway:
+    locations: classpath:db/migrations
+    url: jdbc:postgresql://localhost:5432/spring_db
+    user: chantreck
+    password: chantreck
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spring_db
+    username: chantreck
+    password: chantreck
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+server:
+  port: 8191
