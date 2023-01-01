@@ -48,4 +48,24 @@ public class TaskController {
     public TaskDto createTask(@Validated @RequestBody TaskCreateDto dto) {
         return taskService.createTask(dto);
     }
+
+    @DeleteMapping("/{taskId}")
+    public void deleteTaskById(@PathVariable Integer taskId) {
+        taskService.deleteTaskById(taskId);
+    }
+
+    @PutMapping("/{taskId}")
+    public TaskDto updateTask(@PathVariable Integer taskId, @Validated @RequestBody TaskCreateDto dto) {
+        return taskService.updateTask(taskId, dto);
+    }
+
+    @PatchMapping("/{taskId}/priority")
+    public TaskDto changeTaskPriority(@PathVariable Integer taskId, @RequestBody String priority) {
+        return taskService.changeTaskPriority(taskId, priority);
+    }
+
+    @PatchMapping("/{taskId}/performer")
+    public TaskDto changeTaskPerformer(@PathVariable Integer taskId, @RequestBody String performerLogin) {
+        return taskService.changeTaskPerformer(taskId, performerLogin);
+    }
 }

@@ -23,4 +23,14 @@ public class CommentController {
     public CommentDto createComment(@Validated @RequestBody CommentCreateDto dto) {
         return commentService.createComment(dto);
     }
+
+    @DeleteMapping("/{commentId}")
+    public void deleteCommentById(@PathVariable Integer commentId) {
+        commentService.deleteCommentById(commentId);
+    }
+
+    @PutMapping("/{commentId}")
+    public CommentDto updateComment(@PathVariable Integer commentId, @Validated @RequestBody CommentCreateDto dto) {
+        return commentService.updateComment(commentId, dto);
+    }
 }

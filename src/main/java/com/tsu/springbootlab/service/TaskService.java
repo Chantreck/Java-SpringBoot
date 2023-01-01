@@ -1,10 +1,9 @@
 package com.tsu.springbootlab.service;
 
-import com.tsu.springbootlab.csv.CSVConverter;
+import com.tsu.springbootlab.converters.TaskConverter;
 import com.tsu.springbootlab.csv.TaskCSV;
 import com.tsu.springbootlab.dto.TaskCreateDto;
 import com.tsu.springbootlab.dto.TaskDto;
-import com.tsu.springbootlab.dto.converters.TaskDtoConverter;
 import com.tsu.springbootlab.entity.TaskEntity;
 import com.tsu.springbootlab.exceptions.IncorrectDateException;
 import com.tsu.springbootlab.exceptions.TaskNotFoundException;
@@ -30,21 +29,27 @@ public class TaskService {
     private final ProjectService projectService;
     private final UserService userService;
 
+    private final TaskConverter converter;
+
     @Transactional
     public TaskDto createTask(TaskCreateDto dto) {
         var creator = userService.getUserEntityById(dto.getCreatorId());
         var performer = userService.getUserEntityById(dto.getPerformerId());
         var project = projectService.getProjectEntityById(dto.getProjectId());
 
-        var entity = TaskDtoConverter.convertDtoToEntity(dto, creator, performer, project);
+        var entity = converter.convertDtoToEntity(dto);
+        entity.setCreator(creator);
+        entity.setPerformer(performer);
+        entity.setProject(project);
         entity = taskRepository.save(entity);
-        return TaskDtoConverter.convertEntityToDto(entity);
+
+        return converter.convertEntityToDto(entity);
     }
 
     @Transactional(readOnly = true)
     public TaskDto getTaskDtoById(Integer id) {
         var entity = getTaskEntityById(id);
-        return TaskDtoConverter.convertEntityToDto(entity);
+        return converter.convertEntityToDto(entity);
     }
 
     public TaskEntity getTaskEntityById(Integer id) {
@@ -60,20 +65,20 @@ public class TaskService {
     public List<TaskDto> getTasksByProjectId(Integer projectId) {
         var project = projectService.getProjectEntityById(projectId);
         var entities = taskRepository.findAllByProject(project);
-        return TaskDtoConverter.convertEntitiesToDto(entities);
+        return converter.convertEntitiesToDto(entities);
     }
 
     @Transactional(readOnly = true)
     public List<TaskDto> getTasksByPerformerId(Integer performerId) {
         var performer = userService.getUserEntityById(performerId);
         var entities = taskRepository.findAllByPerformer(performer);
-        return TaskDtoConverter.convertEntitiesToDto(entities);
+        return converter.convertEntitiesToDto(entities);
     }
 
     @Transactional(readOnly = true)
     public List<TaskDto> getAllTasks() {
         var entities = taskRepository.findAll();
-        return TaskDtoConverter.convertEntitiesToDto(entities);
+        return converter.convertEntitiesToDto(entities);
     }
 
     @Transactional(readOnly = true)
@@ -84,7 +89,7 @@ public class TaskService {
         comments.forEach(comment -> taskEntities.addAll(comment.getTasks()));
 
         return taskEntities.stream()
-                .map(TaskDtoConverter::convertEntityToDto)
+                .map(converter::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 
@@ -123,7 +128,7 @@ public class TaskService {
             return sb.and(predicates.toArray(new Predicate[0]));
         });
 
-        return TaskDtoConverter.convertEntitiesToDto(entities);
+        return converter.convertEntitiesToDto(entities);
     }
 
     @Transactional
@@ -131,11 +136,55 @@ public class TaskService {
         var result = new ArrayList<TaskDto>();
 
         tasks.forEach(task -> {
-            var taskCreateDto = CSVConverter.convertTaskCSV(task);
+            var taskCreateDto = converter.convertCsvToDto(task);
             var taskDto = createTask(taskCreateDto);
             result.add(taskDto);
         });
 
         return result;
+    }
+
+    @Transactional
+    public void deleteTaskById(Integer taskId) {
+        taskRepository.deleteById(taskId);
+    }
+
+    @Transactional
+    public TaskDto updateTask(Integer taskId, TaskCreateDto dto) {
+        var entity = getTaskEntityById(taskId);
+        var creator = userService.getUserEntityById(dto.getCreatorId());
+        var performer = userService.getUserEntityById(dto.getPerformerId());
+        var project = projectService.getProjectEntityById(dto.getProjectId());
+
+        entity.setCreatedAt(dto.getCreatedAt());
+        entity.setEditedAt(dto.getEditedAt());
+        entity.setTitle(dto.getTitle());
+        entity.setDescription(dto.getDescription());
+        entity.setCreator(creator);
+        entity.setPerformer(performer);
+        entity.setPriority(dto.getPriority());
+        entity.setProject(project);
+        entity.setTaskETA(dto.getTaskETA());
+
+        return converter.convertEntityToDto(entity);
+    }
+
+    @Transactional
+    public TaskDto changeTaskPriority(Integer taskId, String priority) {
+        var entity = getTaskEntityById(taskId);
+
+        entity.setPriority(priority);
+
+        return converter.convertEntityToDto(entity);
+    }
+
+    @Transactional
+    public TaskDto changeTaskPerformer(Integer taskId, String performerLogin) {
+        var entity = getTaskEntityById(taskId);
+        var performer = userService.getUserByLogin(performerLogin);
+
+        entity.setPerformer(performer);
+
+        return converter.convertEntityToDto(entity);
     }
 }

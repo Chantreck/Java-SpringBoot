@@ -23,6 +23,10 @@ create table users
     role       varchar(255)
 );
 
+insert into users
+(created_at, edited_at, login, name, password, role)
+VALUES ('0001-01-01', '0001-01-01', 'Root', 'root', 'root', 'ADMIN');
+
 alter table users
     owner to chantreck;
 

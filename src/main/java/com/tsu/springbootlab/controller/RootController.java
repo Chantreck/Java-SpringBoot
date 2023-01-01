@@ -25,7 +25,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class RootController {
-
     private final UserService userService;
     private final TaskService taskService;
     private final ProjectService projectService;

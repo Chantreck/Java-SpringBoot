@@ -23,4 +23,14 @@ public class ProjectController {
     public ProjectDto createProject(@Validated @RequestBody ProjectCreateDto dto) {
         return projectService.createProject(dto);
     }
+
+    @DeleteMapping("/{projectId}")
+    public void deleteProjectById(@PathVariable Integer projectId) {
+        projectService.deleteProjectById(projectId);
+    }
+
+    @PutMapping("/{projectId}")
+    public ProjectDto updateProject(@PathVariable Integer projectId, @Validated @RequestBody ProjectCreateDto dto) {
+        return projectService.updateProject(projectId, dto);
+    }
 }

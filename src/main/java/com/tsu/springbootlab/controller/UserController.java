@@ -56,4 +56,19 @@ public class UserController {
 
         return null;
     }
+
+    @PatchMapping("/{userId}/role")
+    public UserDto changeRole(@PathVariable Integer userId, @RequestBody String role) {
+        return userService.changeRole(userId, role);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable Integer userId) {
+        userService.deleteUserById(userId);
+    }
+
+    @PutMapping("/{userId}")
+    public UserDto updateUser(@PathVariable Integer userId, @RequestBody UserCreateDto dto) {
+        return userService.updateUser(userId, dto);
+    }
 }
